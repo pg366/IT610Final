@@ -1,0 +1,91 @@
+###################################################################################################
+################  Installation and Configuration of “NAGIOS SERVER”  ##############################
+###################################################################################################
+
+######	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+
+######	Installation and Configuration of pre-requisites:
+
+	apt install apache2 php7.0-gd libapache2-mod-php7.0 build-essential libgd2-xpm-dev openssl libssl-dev unzip
+	useradd Nagios
+	groupadd nagcmd
+  	usermod -G nagcmd nagios
+  	usermod -a -G nagcmd www-data
+
+######	Change to /tmp directory for downloading Nagios server and Plugins tarball and configure it:
+
+	wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz
+	tar zxvf nagios-4.3.4.tar.gz
+	cd nagios-4.3.4/
+	./configure --with-nagios-group=nagios --with-command-group=nagcmd --with-httpd_conf=/etc/apache2/sites-enabled/
+	make all
+	make install
+	make install-init
+	make install-config
+	make install-commandmode
+	make install-webconf
+	htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+	a2enmod cgi
+	service apache2 restart
+	cd ..
+	wget https://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+	tar zxvf nagios-plugins-2.2.1.tar.gz 
+	cd nagios-plugins-2.2.1/
+	./configure -with-nagios-user=nagios -with-nagios-group=nagios
+	make
+	make install
+	ln -s /etc/init.d/nagios /etc/rcS.d/S99nagios
+	/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+	/etc/init.d/nagios start
+	## Edit Nagios Config file: /etc/systemd/system/nagios.service
+	systemctl enable /etc/systemd/system/nagios.service
+	systemctl start nagios
+	cd ..
+	wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+	tar zxvf nrpe-3.2.1.tar.gz
+	cd nrpe-3.2.1/
+	./configure
+	make check_nrpe
+	make install-plugin
+	systemctl restart nagios.service
+
+	## Edited the Nagios config file:
+	/usr/local/nagios/etc/nagios.cfg
+	mkdir /usr/local/nagios/etc/servers
+
+	## Edited the Nagios commands config file for defining the commands for NRPE to monitor to remote hosts
+
+	/usr/local/nagios/etc/objects/commands.cfg
+	a2enmod rewrite
+	a2enmod cgi
+	systemctl restart apache2
+
+	## Edited the Remote host (Zimbra10) configuration file for remote monitoring
+
+	/usr/local/nagios/etc/servers/zimbra10.cfg
+
+	## Edited the Remote host (db1) configuration file for remote monitoring
+
+	/usr/local/nagios/etc/servers/db1.cfg
+
+	systemctl restart nagios
+  
+	## Edited the contacts file for defining the contacts for notification in case some trigger or alert is generated in Nagios
+ 
+	/usr/local/nagios/etc/objects/contacts.cfg
+
+
+######	Install and configure snmp package for monitoring Network Traffic
+
+	apt install snmpd snmp-mibs-downloader
+	
+	## comment “mibs” in /etc/snmp/snmp.conf
+	## uncomment “rocommunity public  localhost” in /etc/snmp/snmpd.conf
+	/etc/init.d/snmpd restart
+
+
+The Nagios Console can be accessed through below URL
+ 
+<Nagios Server Public URL>/nagios

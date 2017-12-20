@@ -97,6 +97,7 @@ max_binlog_size   = 100M
 # Read the manual, too, if you want chroot!
 # chroot = /var/lib/mysql/
 #
+#
 # For generating SSL certificates I recommend the OpenSSL GUI "tinyca".
 #
 # ssl-ca=/etc/mysql/cacert.pem

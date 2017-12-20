@@ -1,0 +1,172 @@
+####################################################################################################
+#############  Installation and Configuration of “APACHE (WEB) SERVER” #############################
+####################################################################################################
+
+###### 	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+
+###### 	Installed the Apache package
+	apt install apache2
+
+######	Changes has been made to default web page of apache at location:
+	/var/www/html/index.html
+	
+######	Apache service daemon has been started
+	/etc/init.d/apache2 start
+
+####################################################################################################
+##############  Installation and Configuration of “MAIL SERVER”  ###################################
+####################################################################################################
+
+
+######	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+	
+######	Installed the postfix
+	apt install postfix
+
+######	Re-configuration of postfix has been done using command: 
+	dpkg-reconfigure postfix
+	
+	The user interface will be displayed. On each screen, selected the following values:
+
+	*Internet Site
+	*zimbra10.example.com
+	*root
+	*zimbra10.example.com, localhost.localdomain, localhost
+	*No
+	*127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 172.31.0.0/16
+	*0
+	*+
+	*all
+
+	Postfix service has been restarted
+	/etc/init.d/postfix restart
+
+	The above configuration can be verified in the config file for postfix below:
+	/etc/postfix/main.cf
+          
+######	Installed Dovecot:
+	/etc/postfix/main.cf
+
+	Restarted the service for Dovecot
+	/etc/postfix/main.cf
+ 
+######	Installed and configured Squirrelmail for providing web interface for mail server:
+
+	apt install squirrelmail
+
+	squirrelmail-configure
+	Select 2 (Server Settings)
+	
+		Select 1 (Domain) and give the domain name for mail server. In our case it is “zimbra10.example.com”
+	
+		Press R to return to previous menu
+	
+	Select A (Update IMAP Settings): write “zimbra10.example.com”
+	
+	Press R to return to previous menu
+
+	Select 4 (General Options)  11 ( Allow server-side sorting ) Yes
+
+		Press S (Save data)
+
+######	Make directory in apache configuration for accessing Mail server
+
+	mkdir -p /var/www/zimbra10.example.com/public_html
+
+	cd /etc/apache2/sites-available/
+
+	cp 000-default.conf zimbra10.example.com.conf
+ 	
+	## Edit zimbra10.example.com.conf and configure the file for apache configuration
+
+	Enable site : a2ensite zimbra10.example.com.conf 
+	Disable default site : a2dissite 000-default.conf
+
+	service apache2 reload
+
+	## Make link of squirrelmail configuration in /var/www/zimbra10.example.com/public_html/
+
+	cd /var/www/zimbra10.example.com/public_html/
+	ln -s /usr/share/squirrelmail squirrelmail
+	service apache2 restart
+
+#####	Create test user for mail server 
+
+	useradd -d /var/www/zimbra10.example.com/public_html/test1 test1
+	useradd -d /var/www/zimbra10.example.com/public_html/test2 test2
+	
+ 	## Assign them to “mail” group
+	useradd -aG mail test1
+	useradd -aG mail test2
+
+	## Create home directory for Test users
+	mkdir /var/www/zimbra10.example.com/public_html/test1
+	mkdir /var/www/zimbra10.example.com/public_html/test2
+
+	## Change permission for home directories
+	chown -R test1.test1 /var/www/zimbra10.example.com/public_html/test1
+	chown -R test2.test2 /var/www/zimbra10.example.com/public_html/test2
+
+	## Assign password for Test users
+	passwd test1
+	passwd test2
+
+	Restart Apache service: 
+	/etc/init.d/apache2 restart
+
+######	Configure /etc/hosts file and map server IP to domain name
+
+######	Check the mail from web interface:
+	
+	 <Server Public URL from AWS>/squirrelmail
+
+
+####################################################################################################
+################  Installation and Configuration of Nagios Agent  ##################################
+####################################################################################################
+
+######	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+
+######	Install pre-requisite packages
+	apt install build-essential libgd2-xpm-dev openssl libssl-dev unzip
+ 
+######	Change to /tmp directory and download the Nagios agent packages in the form of tarball and configure it:
+
+	wget http://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+	tar zxvf nagios-plugins-2.2.1.tar.gz
+	cd nagios-plugins-2.2.1/
+	./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+	make
+	make install
+	cd ..
+	wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+	tar zxvf nrpe-3.2.1.tar.gz
+	cd nrpe-3.2.1/
+	./configure --enable-command-args --with-nagios-user=nagios --with-nagios-group=nagios --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+	make all
+	make install
+	make install-config
+	make install-init
+
+######	Edit Nagios Agent configuration File:
+
+	/usr/local/nagios/etc/nrpe.cfg
+	
+	** Assign Server_address as Private IP of Monitored Server
+	** Assign Allowed hosts in allowed_hosts parameter: Monitoring Nagios Server Private IP
+
+	systemctl restart nrpe.service
+
+######	Install and configure snmp package for monitoring Network Traffic
+
+	apt install snmpd snmp-mibs-downloader
+	comment “mibs” in /etc/snmp/snmp.conf
+	uncomment “rocommunity public  localhost” in /etc/snmp/snmpd.conf
+	/etc/init.d/snmpd restart
+

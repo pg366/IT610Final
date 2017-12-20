@@ -1,0 +1,23 @@
+#######################################################################################
+#######################  README FOR FINAL PROJECT  ####################################
+#######################################################################################
+
+Three Servers have been installed and configured on AWS
+	
+	1) Web Server and Mail Server
+	2) Database Server
+	3) Nagios Server
+
+Each server has been installed with Nagios Agent for Monitoring.
+
+The SERVER DOCUMENTATION and CONFIG files for each of the three Servers have been uploaded 
+on GITHUB and kept in three separate folders as below: 
+	
+	1) MailServer_Apache
+	2) MySql_Server
+	3) NagiosServer
+
+
+#######################################################################################
+#######################################################################################
+

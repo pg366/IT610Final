@@ -21,6 +21,7 @@
 # 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
 # 
 # For more information see the manual pages of crontab(5) and cron(8)
+#
 # 
 # m h  dom mon dow   command
 0 0 * * * /bin/bash /root/scripts/sqlbackup.sh 2>&1 >> /dev/null

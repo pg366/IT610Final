@@ -32,7 +32,7 @@ fi
 ####  Checking the Database Backup files in the backup folder. If they are older than N verion then executing
 ####  the command to delete the Nth version backup file
  
-find "$BKPFOLDER" -name db_bkp_* -mmin +3 -exec rm {} \;
+find "$BKPFOLDER" -name db_bkp_* -mtime +7 -exec rm {} \;
 
 #### Logging the success or failure of previous command to log file based on the previous command and 
 #### notifying the System Admin through Mail in case Database backup deletion failed  ####

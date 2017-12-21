@@ -1,0 +1,80 @@
+##########################################################################################
+#############  Installation and Configuration of “MYSQL SERVER”  #########################
+##########################################################################################
+
+######	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+
+######	Installed the Mysql Server package
+
+	apt install mysql-server
+
+	## Do the security configuration check by running below command:
+
+	mysql_secure_installation
+
+	## Do the configuration update in mysql config file: 
+
+	/etc/mysql/mysql.conf.d/mysqld.cnf
+
+######	Login to mysql and create a user and grant it required privileges:
+
+	mysql –uroot –p
+
+	mysql> create user 'test4'@'localhost' identified by ‘test123’;
+	mysql> grant all privileges on *.* to 'test4'@'localhost';
+	mysql> flush privileges;
+
+######	Downloaded a test database “employees.sql” and insert it into the database server
+
+######	Created a Database Backup script and configure it in crontab
+	
+	/root/scripts/sqlbackup.sh
+
+
+####################################################################################################
+################  Installation and Configuration of Nagios Agent  ##################################
+####################################################################################################
+
+######	Ubuntu system has been updated and upgraded by issuing following command:
+	apt update
+	apt upgrade
+
+######	Install pre-requisite packages
+	apt install build-essential libgd2-xpm-dev openssl libssl-dev unzip
+ 
+######	Change to /tmp directory and download the Nagios agent packages in the form of tarball and configure it:
+
+	wget http://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+	tar zxvf nagios-plugins-2.2.1.tar.gz
+	cd nagios-plugins-2.2.1/
+	./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+	make
+	make install
+	cd ..
+	wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+	tar zxvf nrpe-3.2.1.tar.gz
+	cd nrpe-3.2.1/
+	./configure --enable-command-args --with-nagios-user=nagios --with-nagios-group=nagios --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+	make all
+	make install
+	make install-config
+	make install-init
+
+######	Edit Nagios Agent configuration File:
+
+	/usr/local/nagios/etc/nrpe.cfg
+	
+	** Assign Server_address as Private IP of Monitored Server
+	** Assign Allowed hosts in allowed_hosts parameter: Monitoring Nagios Server Private IP
+
+	systemctl restart nrpe.service
+
+######	Install and configure snmp package for monitoring Network Traffic
+
+	apt install snmpd snmp-mibs-downloader
+	comment “mibs” in /etc/snmp/snmp.conf
+	uncomment “rocommunity public  localhost” in /etc/snmp/snmpd.conf
+	/etc/init.d/snmpd restart
+

@@ -1,0 +1,12 @@
+127.0.0.1 localhost
+172.31.21.228	zimbra10.example.com zimbra10
+172.31.16.252 nagios.example.com nagios
+172.31.43.167 db1.example.com db1
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
